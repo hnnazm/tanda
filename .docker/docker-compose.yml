@@ -1,0 +1,43 @@
+
+services:
+  server:
+    build:
+      context: ../
+      dockerfile: ./.docker/server.Dockerfile
+    command: cargo watch -x run
+    volumes:
+      - ../:/server
+    ports:
+      - 8888:80
+    networks:
+      - tanda
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14-alpine
+    volumes:
+      - ./data/:/var/lib/postgres/
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - 5432:5432
+    networks:
+      - tanda
+
+  dbconsole:
+    image: dpage/pgadmin4
+    ports:
+      - 54321:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    networks:
+      - tanda
+    depends_on:
+      - db
+
+networks:
+  tanda:
